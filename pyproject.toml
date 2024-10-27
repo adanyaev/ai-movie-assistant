@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "ai-movie-assistant"
+version = "0.1.0"
+description = ""
+authors = ["Artem <ardan2076@mail.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+langchain = "^0.3.4"
+langgraph = "^0.2.39"
+langsmith = "^0.1.137"
+aiogram = "^3.13.1"
+langchain-ollama = "^0.2.0"
+langgraph-checkpoint-postgres = "^2.0.2"
+langchain-groq = "^0.2.0"
+python-dotenv = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

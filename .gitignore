@@ -1,98 +1,42 @@
-# Byte-compiled / optimized / DLL files
+# Python bytecode and cache
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
 
-# C extensions
-*.so
-
-# Virtual environments
+# Virtual environment directories
 env/
 venv/
-ENV/
 .venv/
-.ENV/
 
-# Distribution / packaging
-build/
-develop-eggs/
+# Environment variables file
+.env
+
+# PyInstaller
+*.spec
 dist/
-eggs/
+build/
 *.egg-info/
-.installed.cfg
-*.egg
 
-# Logs and databases
+# Logs and local databases
 *.log
 *.sqlite3
-*.db
 
-# Unit test / coverage reports
+# Coverage reports
+.coverage
 htmlcov/
-.tox/
-.nox/
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.cache/
-nosetests.xml
-coverage/
 
-# Django stuff:
-*.migrations/
-*.migrations/**/__init__.py
+# Docker-related files
+# Ignore Docker build folders, containers, etc.
+docker-compose.override.yml
+docker-compose.override.yaml
+docker/
+**/Dockerfile~
+**/Dockerfile-var
 
-# Flask stuff:
-instance/
-.webassets-cache
+# Ignore any leftover containers or images named like this
+*.container
+*.image
 
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# mypy
-.mypy_cache/
-.dmypy.json
-.dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-ENV.bak/
-venv.bak/
-
-# dotenv
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# vscode / pycharm settings
-.vscode/
-.idea/
-
-# macOS
+# System files
 .DS_Store
-
-# Windows
 Thumbs.db
-ehthumbs.db

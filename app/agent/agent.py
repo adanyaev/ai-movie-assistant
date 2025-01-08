@@ -10,20 +10,39 @@ from langgraph.graph import END, START, StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
 from langgraph.checkpoint.postgres import PostgresSaver
 
-import tools as t
+from app.core.config import settings
+from . import tools as t
 
 
-llama = ChatGroq(
-    #model="llama-3.1-70b-versatile",
-    model="llama3-groq-70b-8192-tool-use-preview",
-    temperature=0,
-    max_tokens=None,
-    timeout=None,
-    max_retries=2,
-)
+# llm = ChatGroq(
+#     model="llama-3.1-70b-versatile",
+#     #model="llama3-groq-70b-8192-tool-use-preview",
+#     temperature=0,
+#     max_tokens=None,
+#     timeout=None,
+#     max_retries=2,
+# )
+
+# llm = ChatOpenAI(
+#                 model="gpt-4o",
+#                 api_key=os.environ["OPENAI_API_KEY"],
+#                 #temperature=0,
+#                 max_tokens=None,
+#                 timeout=None,
+#                 max_retries=2,
+#             )
+
+llm = ChatOpenAI(
+            #model="meta-llama/Meta-Llama-3.1-405B-Instruct",
+            model="meta-llama/Llama-3.3-70B-Instruct",
+            api_key=os.environ["DEEPINFRA_KEY"],
+            base_url="https://api.deepinfra.com/v1/openai",
+            # temperature=0,
+            )
 
 
 tools = [t.search_movies_with_filters, t.get_movie_by_title]
@@ -46,7 +65,7 @@ primary_assistant_prompt = ChatPromptTemplate.from_messages(
     ]
 ).partial(time=datetime.now())
 
-llama = primary_assistant_prompt | llama.bind_tools(tools)
+llm = primary_assistant_prompt | llm.bind_tools(tools)
 
 
 trimmer = trim_messages(
@@ -71,8 +90,8 @@ def should_continue(state: MessagesState) -> Literal["tools", END]:
 
 def call_model(state: MessagesState):
     messages = state['messages']
-    response = llama.invoke({'messages': trimmer.invoke(messages)})
-    #response = llama.invoke({'messages': messages})
+    response = llm.invoke({'messages': trimmer.invoke(messages)})
+    #response = llm.invoke({'messages': messages})
     return {"messages": [response]}
 
 
@@ -94,11 +113,12 @@ workflow.add_conditional_edges(
 
 workflow.add_edge("tools", 'agent')
 
-postgres_pass = os.environ.get("POSTGRES_PASS")
-postgres_host = os.environ.get("POSTGRES_HOST")
-postgres_port = os.environ.get("POSTGRES_PORT")
+# postgres_pass = os.environ.get("POSTGRES_PASS")
+# postgres_host = os.environ.get("POSTGRES_HOST")
+# postgres_port = os.environ.get("POSTGRES_PORT")
 
-DB_URI = f"postgresql://postgres:{postgres_pass}@{postgres_host}:{postgres_port}/postgres?sslmode=disable"
+DB_URI = settings.DB_URI
+
 connection_kwargs = {
     "autocommit": True,
     "prepare_threshold": 0,

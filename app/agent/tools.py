@@ -7,7 +7,7 @@ import requests
 from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 
-import kp_config
+from . import kp_config
 
 
 API_KEY = os.environ.get("KP_API_KEY")

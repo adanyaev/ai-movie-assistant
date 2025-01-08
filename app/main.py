@@ -13,7 +13,9 @@ from psycopg import AsyncConnection
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 #from langgraph.checkpoint.memory import MemorySaver
 
-import app.agent as agent
+from app.core.config import settings
+import app.core.database as db
+import app.agent.agent as agent
 
 
 TOKEN = os.environ.get("TELEGRAM_TOKEN")
@@ -39,7 +41,7 @@ async def echo_handler(message: Message) -> None:
     By default, message handler will handle all message types (like a text, photo, sticker etc.)
     """
     
-    async with await AsyncConnection.connect(agent.DB_URI, **agent.connection_kwargs) as conn:
+    async with await AsyncConnection.connect(settings.DB_URI, **agent.connection_kwargs) as conn:
         checkpointer = AsyncPostgresSaver(conn)
         #await checkpointer.setup()
         #checkpointer = MemorySaver()
@@ -60,7 +62,9 @@ async def echo_handler(message: Message) -> None:
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-
+    db.setup_db()
+    print(settings.DB_URI)
+    await db.populate_db_with_fake_data()
     # And the run events dispatching
     await dp.start_polling(bot)
 

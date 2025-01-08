@@ -14,7 +14,8 @@ from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
 from langgraph.checkpoint.postgres import PostgresSaver
 
-import app.tools as t
+from app.core.config import settings
+from . import tools as t
 
 
 # llm = ChatGroq(
@@ -116,7 +117,7 @@ workflow.add_edge("tools", 'agent')
 # postgres_host = os.environ.get("POSTGRES_HOST")
 # postgres_port = os.environ.get("POSTGRES_PORT")
 
-DB_URI = os.environ.get("DB_URI")
+DB_URI = settings.DB_URI
 
 connection_kwargs = {
     "autocommit": True,

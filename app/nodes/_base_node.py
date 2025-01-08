@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser, BaseOutputParser
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import PromptTemplate
 
-from ai_movie_assistant.graph.state import AgentState
+from app.graph.state import AgentState
 
 
 class BaseNode(ABC):

@@ -2,7 +2,6 @@ import asyncio
 import logging
 import sys
 import os
-from dotenv import load_dotenv
 
 from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
@@ -14,9 +13,7 @@ from psycopg import AsyncConnection
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 #from langgraph.checkpoint.memory import MemorySaver
 
-load_dotenv()
-
-import agent
+import app.agent as agent
 
 
 TOKEN = os.environ.get("TELEGRAM_TOKEN")

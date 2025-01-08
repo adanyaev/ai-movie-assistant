@@ -11,7 +11,7 @@ class CRUDBase:
         self.model = model
         self.schema = schema
 
-    async def create(self, db: AsyncSession, obj_in: dict) -> BaseModel:
+    async def create(self, db: AsyncSession, obj_in: dict) -> BaseModel: # Override this method in the child classes using the schema
         db_obj = self.model(**obj_in)
         db.add(db_obj)
         await db.commit()

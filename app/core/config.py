@@ -16,8 +16,11 @@ class Settings(BaseSettings):
 
     DB_URI: str = "sqlite:///./test.db"
     ASYNC_DB_URI: str
-
     DROP_DB: bool = False
+
+    TELEGRAM_TOKEN: str
+    USE_WEBHOOK: bool = False
+    
 
 
 settings = Settings()

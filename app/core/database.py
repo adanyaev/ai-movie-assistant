@@ -41,12 +41,14 @@ def setup_db() -> None:
 
 
 async def populate_db_with_fake_data() -> None:
+    import random
     async with async_session_factory() as session:
         # Create users
         users = []
         for i in range(5):
             user_data = {
                 "full_name": f"User {i+1}",
+                "tg_chat_id": random.randint(1000, 999999)
             }
             user = await crud.user.create(session, user_data)
             users.append(user)

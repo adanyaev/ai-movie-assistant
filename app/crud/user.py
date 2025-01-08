@@ -18,6 +18,14 @@ class CRUDUser(CRUDBase):
         if scalar is None:
             return None
         return self.schema.model_validate(scalar)
+    
+    async def get_by_tg_chat_id(self, db: AsyncSession, tg_chat_id: int) -> Optional[UserSchema]:
+        query = select(self.model).where(self.model.tg_chat_id == tg_chat_id)
+        result = await db.execute(query)
+        scalar = result.scalar_one_or_none()
+        if scalar is None:
+            return None
+        return self.schema.model_validate(scalar)
 
     async def get_preferences_by_user_id(self, db: AsyncSession, user_id: int) -> list[UserPreferenceSchema]:
         query = select(UserPreference).where(UserPreference.user_id == user_id)

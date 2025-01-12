@@ -98,7 +98,7 @@ default_search_params = {
 }
 
 
-genre_names = Literal[
+genre_names = (
     "аниме",
     "биография",
     "боевик",
@@ -131,6 +131,6 @@ genre_names = Literal[
     "фильм-нуар",
     "фэнтези",
     "церемония",
-]
+)
 
-item_types = Literal["animated-series", "anime", "cartoon", "movie", "tv-series"]
+all_item_types = ("animated-series", "anime", "cartoon", "movie", "tv-series")

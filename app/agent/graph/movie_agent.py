@@ -7,6 +7,7 @@ from app.agent.nodes import (
     ExecutorNode,
     MoviesSearch,
     MovieSearchByName,
+    MovieReviewsSummarizer,
     PeopleSearch,
     PeopleSearchByName,
 )
@@ -29,6 +30,7 @@ class MovieAgent:
         # tools
         movies_search = MoviesSearch(self._llm, show_logs=self._show_logs)
         movie_search_by_name = MovieSearchByName(self._llm, show_logs=self._show_logs)
+        movie_reviews_summarizer = MovieReviewsSummarizer(self._llm, show_logs=self._show_logs)
         people_search = PeopleSearch(self._llm, show_logs=self._show_logs)
         people_search_by_name = PeopleSearchByName(self._llm, show_logs=self._show_logs)
 
@@ -36,7 +38,13 @@ class MovieAgent:
         planner_node = PlannerNode(self._llm, show_logs=self._show_logs)
         executor_node = ExecutorNode(
             self._llm,
-            [movies_search, movie_search_by_name, people_search, people_search_by_name],
+            [
+                movies_search,
+                movie_search_by_name,
+                movie_reviews_summarizer,
+                people_search,
+                people_search_by_name,
+            ],
             show_logs=self._show_logs,
         )
 
@@ -62,7 +70,8 @@ if __name__ == "__main__":
     # gpt = LLMFactory.get_llm("gpt-4o")
 
     # state = AgentState(history=[HumanMessage("Какой рейтинг у фильма Ирония судьбы?")], user_id="test_user")
-    state = AgentState(history=[HumanMessage("Посоветуй американские фильмы в жанре фантастика")], user_id="test_user")
+    # state = AgentState(history=[HumanMessage("Посоветуй американские фильмы в жанре фантастика")], user_id="test_user")
+    state = AgentState(history=[HumanMessage("Расскажи, что пишут о фильме Побег из Шоушенка")], user_id="test_user")
     gpt = LLMFactory.get_llm("deepinfra/Llama-3.3-70B-Instruct")
 
     agent = MovieAgent(gpt, show_logs=True)

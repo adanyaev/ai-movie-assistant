@@ -125,8 +125,8 @@ class MovieSearchByName(BaseApiTool):
             "X-API-KEY": os.environ["KP_API_KEY"]
         }
         params = copy.deepcopy(kp_utils.default_search_params)
-        params["page"] = 1
         params["limit"] = self._limit
+        params["type"] = kp_utils.all_item_types
         params["query"] = params_generated["query"]
         api_response = requests.get(self.BASE_URL, params=params, headers=headers)
         if not api_response.ok:

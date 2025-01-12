@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Dict
 from pathlib import Path
 import os
 
@@ -14,29 +14,40 @@ load_dotenv(BASE_PATH)
 class LLMFactory:
     SUPPORTED_MODELS = Literal["gpt-4o", "gpt-4o-mini"]
 
-    _gpt = ChatOpenAI(
-        model="gpt-4o",
-        temperature=0,
-        max_tokens=None,
-        timeout=6000,
-        max_retries=2,
-        api_key=os.environ["OPENAI_API_KEY"]
-    )
+    _initialized_models: Dict[str, BaseChatModel] = {}
 
-    _gpt_mini = ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=0,
-        max_tokens=None,
-        timeout=6000,
-        max_retries=2,
-        api_key=os.environ["OPENAI_API_KEY"]
-    )
-
-    _model_name_to_class = {
-        "gpt-4o": _gpt,
-        "gpt-4o-mini": _gpt_mini
-    }
 
     @classmethod
-    def get_llm(cls, llm_name: SUPPORTED_MODELS) -> BaseChatModel:
-        return cls._model_name_to_class[llm_name]
+    def get_llm(cls, model_name: str) -> BaseChatModel:
+        if model_name not in cls._initialized_models:
+            if model_name == "gpt-4o":
+                cls._initialized_models[model_name] = ChatOpenAI(
+                    model="gpt-4o",
+                    temperature=0,
+                    max_tokens=None,
+                    timeout=6000,
+                    max_retries=2,
+                    api_key=os.environ["OPENAI_API_KEY"]
+                )
+            elif model_name == "gpt-4o-mini":
+                cls._initialized_models[model_name] = ChatOpenAI(
+                    model="gpt-4o-mini",
+                    temperature=0,
+                    max_tokens=None,
+                    timeout=6000,
+                    max_retries=2,
+                    api_key=os.environ["OPENAI_API_KEY"]
+                )
+            elif model_name == "deepinfra/Llama-3.3-70B-Instruct":
+                cls._initialized_models[model_name] = ChatOpenAI(
+                    model="meta-llama/Llama-3.3-70B-Instruct",
+                    base_url="https://api.deepinfra.com/v1/openai",
+                    api_key=os.environ["DEEPINFRA_KEY"],
+                    temperature=0,
+                    max_tokens=None,
+                    timeout=6000,
+                    max_retries=2,
+                )
+            else:
+                raise ValueError(f"Unsupported model: {model_name}")
+        return cls._initialized_models[model_name]

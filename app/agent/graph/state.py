@@ -1,7 +1,7 @@
 from typing import List
 
-from langchain_core.pydantic_v1 import BaseModel
 from langchain_core.messages import BaseMessage
+from pydantic import BaseModel
 
 
 class AgentState(BaseModel):

@@ -10,7 +10,7 @@ from app.models.message import MessageType
 
 async_engine = create_async_engine(
     settings.ASYNC_DB_URI,
-    echo=True,
+    echo=settings.VERBOSE_DB,
 )
 async_session_factory = async_sessionmaker(async_engine)
 
@@ -18,7 +18,7 @@ def init_db() -> None:
 
     engine = create_engine(
         settings.DB_URI,
-        echo=True,
+        echo=settings.VERBOSE_DB,
     )
     Base.metadata.create_all(engine)
 
@@ -27,7 +27,7 @@ def drop_db() -> None:
 
     engine = create_engine(
         settings.DB_URI,
-        echo=True,
+        echo=settings.VERBOSE_DB,
     )
     Base.metadata.drop_all(engine)
 

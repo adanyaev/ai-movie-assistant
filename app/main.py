@@ -30,7 +30,7 @@ async def aiogram_on_shutdown_polling(dispatcher: Dispatcher, bot: Bot) -> None:
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+    logging.basicConfig(level=logging.CRITICAL, stream=sys.stdout)
 
     bot = Bot(
         settings.TELEGRAM_TOKEN,

@@ -18,6 +18,7 @@ class UserPreference(UserPreferenceBase):
 
 class User(BaseModel):
     id: int
+    tg_chat_id: int
     full_name: str
     is_active: bool
     is_superuser: bool

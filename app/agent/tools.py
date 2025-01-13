@@ -65,7 +65,8 @@ def transform_movie_data(movie_json: dict) -> str:
 
     
     output = f"""
-    Title: {name} ({year})
+    Title: {name}
+    Year: {year}
     Type: {movie_type.capitalize()}
     Country: {countries}
     Genres: {genres}

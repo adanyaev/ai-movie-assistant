@@ -14,13 +14,21 @@ class Settings(BaseSettings):
     )
     PROJECT_NAME: str = "ai-movie-assistant"
 
+    # Database
     DB_URI: str = "sqlite:///./test.db"
     ASYNC_DB_URI: str
     DROP_DB: bool = False
+    VERBOSE_DB: bool = False
 
+    # Telegram bot
     TELEGRAM_TOKEN: str
     USE_WEBHOOK: bool = False
-    
+
+    # LLM agent
+    KP_API_KEY: str
+    LLM_NAME: str
+    VERBOSE_AGENT: bool = False
+    USER_HISTORY_LIMIT: int = 5
 
 
 settings = Settings()

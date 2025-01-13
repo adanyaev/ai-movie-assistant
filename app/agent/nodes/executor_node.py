@@ -54,7 +54,10 @@ class ExecutorNode(BaseNode):
         print(self._name_to_executor)
 
         for task in plan.tasks:
+
+            #TODO: add search of closest executor name
             executor = self._name_to_executor[task.agent]
+
             collected_info.append(executor.invoke(task.question, collected_info[-1] if collected_info else ""))
 
         answer = self._chain.invoke({"history": self._history_to_str(state.history), "collected_info": collected_info})

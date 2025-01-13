@@ -1,5 +1,6 @@
-
 # AI - movie assistant
 
 ## Launch
-`make`
+1. `cp .env.example .env`
+2. Заполнить переменные
+3. `make`

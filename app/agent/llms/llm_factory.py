@@ -12,13 +12,13 @@ load_dotenv(BASE_PATH)
 
 
 class LLMFactory:
-    SUPPORTED_MODELS = Literal["gpt-4o", "gpt-4o-mini"]
+    SUPPORTED_MODELS = Literal["gpt-4o", "gpt-4o-mini", "deepinfra/Llama-3.3-70B-Instruct"]
 
     _initialized_models: Dict[str, BaseChatModel] = {}
 
 
     @classmethod
-    def get_llm(cls, model_name: str) -> BaseChatModel:
+    def get_llm(cls, model_name: SUPPORTED_MODELS) -> BaseChatModel:
         if model_name not in cls._initialized_models:
             if model_name == "gpt-4o":
                 cls._initialized_models[model_name] = ChatOpenAI(

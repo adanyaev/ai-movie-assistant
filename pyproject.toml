@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ai-movie-assistant"
+name = "app"
 version = "0.1.0"
 description = ""
 authors = ["Artem <ardan2076@mail.ru>"]

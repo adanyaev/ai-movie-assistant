@@ -111,7 +111,7 @@ class PeopleSearchByName(BaseApiTool):
     ):
         super().__init__(llm, api_prompt, answer_prompt, api_parser, answer_parser, name, description, limit, show_logs)
 
-    def _invoke(self, question: str, collected_info: str) -> str:
+    def _invoke(self, question: str, collected_info: str, *args, **kwargs) -> str:
         params = self._chain.invoke({"question": question, "collected_info": collected_info})
         headers = {
             "accept": "application/json",

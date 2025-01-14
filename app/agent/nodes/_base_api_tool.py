@@ -28,9 +28,9 @@ class BaseApiTool(ABC):
         self._limit = limit
         self._show_logs = show_logs
 
-    def invoke(self, question: str, collected_info: str) -> str:
-        return self._invoke(question, collected_info)
+    def invoke(self, question: str, collected_info: str, *args, **kwargs) -> str:
+        return self._invoke(question, collected_info, *args, **kwargs)
 
     @abstractmethod
-    def _invoke(self, question: str, collected_info: str) -> str:
+    def _invoke(self, question: str, collected_info: str, *args, **kwargs) -> str:
         pass

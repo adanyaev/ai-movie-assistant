@@ -152,7 +152,7 @@ class PeopleSearch(BaseApiTool):
         super().__init__(llm, api_prompt, answer_prompt, api_parser, answer_parser, name, description, limit, show_logs)
         self._format_instructions = api_parser.get_format_instructions()
 
-    def _invoke(self, question: str, collected_info: str) -> str:
+    def _invoke(self, question: str, collected_info: str, *args, **kwargs) -> str:
         request_data = self._chain.invoke({"question": question, "collected_info": collected_info, "fields": OUTPUT_FIELDS,
                                            "format_instructions": self._format_instructions})
         headers = {

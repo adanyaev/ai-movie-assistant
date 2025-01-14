@@ -7,8 +7,7 @@ from .graph.movie_agent import MovieAgent
 from .graph.state import AgentState
 
 
-def build_state(messages: list[tuple[str, str]], user_id: str):
-    print([_convert_to_message(message).format() for message in messages])
+def build_state(messages: list[tuple[str, str]], user_id: int):
     state = AgentState(
         history=[_convert_to_message(message).format() for message in messages],
         user_id=user_id

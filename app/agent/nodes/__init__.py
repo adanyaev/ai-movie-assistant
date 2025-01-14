@@ -7,3 +7,5 @@ from .movie_reviews_summarizer import MovieReviewsSummarizer
 
 from .people_search import PeopleSearch
 from .people_search_by_name import PeopleSearchByName
+
+from .user_preferences import UserPreferencesManager

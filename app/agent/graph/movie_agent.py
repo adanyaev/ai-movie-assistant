@@ -10,6 +10,8 @@ from app.agent.nodes import (
     MovieReviewsSummarizer,
     PeopleSearch,
     PeopleSearchByName,
+    UserPreferencesManager,
+
 )
 
 
@@ -33,6 +35,7 @@ class MovieAgent:
         movie_reviews_summarizer = MovieReviewsSummarizer(self._llm, show_logs=self._show_logs)
         people_search = PeopleSearch(self._llm, show_logs=self._show_logs)
         people_search_by_name = PeopleSearchByName(self._llm, show_logs=self._show_logs)
+        prefs_manager = UserPreferencesManager(self._llm, show_logs=self._show_logs)
 
         # nodes
         planner_node = PlannerNode(self._llm, show_logs=self._show_logs)
@@ -44,6 +47,7 @@ class MovieAgent:
                 movie_reviews_summarizer,
                 people_search,
                 people_search_by_name,
+                prefs_manager,
             ],
             show_logs=self._show_logs,
         )

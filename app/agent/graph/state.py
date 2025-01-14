@@ -6,4 +6,4 @@ from pydantic import BaseModel
 
 class AgentState(BaseModel):
     history: List[BaseMessage]
-    user_id: str
+    user_id: int

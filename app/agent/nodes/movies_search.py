@@ -24,6 +24,12 @@ MOVIE_SEARCH_PROMPT_TEMPLATE = """
 Тебе нужно составить словарь параметров для отправки http запроса, чтобы получить ответ на QUESTION.
 
 Твой запрос будет отправлен к API со следующими полями для поиска:
+
+0. **`title`** (необязательный):
+    - Поиск по названию фильма или сериала.
+    - При использовании этого поля другие параметры игнорируются.
+    - Формат: массив строк.
+
 1. **`type`** (необязательный):  
    - Поиск по типу фильма.
    - Допустимые значения: `"movie"`, `"tv-series"`, `"cartoon"`, `"animated-series"`, `"anime"`.
@@ -122,9 +128,9 @@ MOVIE_SEARCH_PROMPT_TEMPLATE = """
     - Примеры значений: `"HBO"`, `"Netflix"`, `"!Amazon"`.  
     - Формат: массив строк.  
 
-15. **`persons.id`** (необязательный):  
-    - Поиск по ID персон (актеров, режиссеров и т.д.).  
-    - Примеры значений: `666`, `555`, `!666`.  
+15. **`persons.name`** (необязательный):  
+    - Поиск по имени персон (актеров, режиссеров и т.д.).  
+    - Примеры значений: `Брэд Питт`, `Том Круз`, `!Кристофер Нолан`.  
     - Формат: массив строк.  
 
 16. **`fees.world`**, **`fees.usa`**, **`fees.russia`** (необязательные):  
@@ -155,6 +161,16 @@ MOVIE_SEARCH_PROMPT_TEMPLATE = """
 3. Учти, что COLLECTED_INFO может быть пустым или не относится к вопросу QUESTION.
 
 ## Примеры
+### Пример 0
+QUESTION:
+Расскажи о фильме Интерстеллар.
+COLLECTED_INFO:
+
+Твой ответ:
+{{
+    "title": ["Интерстеллар"]
+}}
+
 ### Пример 1
 QUESTION:
 Найди фильмы 2020 года с рейтингом Кинопоиска выше 8, жанр — драма или комедия, но не ужасы.
@@ -436,6 +452,8 @@ INFO:
 
 
 class MoviesSearch(BaseApiTool):
+    BASE_URL_MOVIE_SEARCH_BY_NAME = "https://api.kinopoisk.dev/v1.4/movie/search"
+    BASE_URL_PERSON_SEARCH_BY_NAME = "https://api.kinopoisk.dev/v1.4/person/search"
     BASE_URL = "https://api.kinopoisk.dev/v1.4/movie"
 
     def __init__(
@@ -453,28 +471,84 @@ class MoviesSearch(BaseApiTool):
         super().__init__(llm, api_prompt, answer_prompt, api_parser, answer_parser, name, description, limit, show_logs)
 
 
+    def _find_persons_ids(self, persons: list[str]) -> list[str]:
+        params = {
+            "page": 1,
+            "limit": 1,
+        }
+        persons_ids = []
+        for person in persons:
+            param_prefix = ''
+            if person[0] == "!" or person[0] == "+":
+                param_prefix = person[0]
+                person = person[1:]
+            params["query"] = person
+            api_response = requests.get(self.BASE_URL_PERSON_SEARCH_BY_NAME, params=params, headers=kp_utils.headers)
+            if not api_response.ok:
+                continue
+            data_json = api_response.json()
+            if not data_json["docs"]:
+                continue
+            persons_ids.append(param_prefix + str(data_json["docs"][0]["id"]))
+        
+        return persons_ids
+
+
+    def _get_docs_filter_search(self, params_generated: dict) -> list:
+        params = copy.deepcopy(kp_utils.default_search_params)
+        params["limit"] = self._limit
+        if "persons.name" in params_generated:
+            persons_ids = self._find_persons_ids(params_generated["persons.name"])
+            if persons_ids:
+                params["persons.id"] = persons_ids
+            del params_generated["persons.name"]
+        params.update(params_generated)
+        api_response = requests.get(self.BASE_URL, params=params, headers=kp_utils.headers)
+        if not api_response.ok:
+            return []
+        json_response = api_response.json()
+        return json_response["docs"]
+
+
+    def _get_docs_name_search(self, generated_params: dict) -> list:
+        params = {
+            "page": 1,
+            "limit": 1,
+        }
+        docs = []
+        for title in generated_params["title"]:
+            params["query"] = title
+            api_response = requests.get(self.BASE_URL_MOVIE_SEARCH_BY_NAME, params=params, headers=kp_utils.headers)
+            if not api_response.ok:
+                continue
+            data_json = api_response.json()
+            if not data_json["docs"]:
+                continue
+            docs.append(data_json["docs"][0])
+        return docs
+
+
     def _invoke(self, question: str, collected_info: str, *args, **kwargs) -> str:
         params_generated = self._chain.invoke({"question": question, "collected_info": collected_info})
 
         if self._show_logs:
             print(f"---{self._name}---")
             print(params_generated)
+        
 
-        headers = {
-            "accept": "application/json",
-            "X-API-KEY": os.environ["KP_API_KEY"]
-        }
-        params = copy.deepcopy(kp_utils.default_search_params)
-        params["limit"] = self._limit
-        params.update(params_generated)
-        api_response = requests.get(self.BASE_URL, params=params, headers=headers)
-        if not api_response.ok:
-            return "Произошла ошибка при обращении к API"
+        if "title" in params_generated:
+            docs = self._get_docs_name_search(params_generated)
+        else:
+            docs = self._get_docs_filter_search(params_generated)
 
-        api_response = "\n\n---\n\n".join([kp_utils.transform_movie_data(i) for i in api_response.json()["docs"]])
+        if not docs:
+            api_response = "Error"
+            api_answer = "К сожалению, я не смог найти информацию по вашему запросу"
+        else:
+            api_response = "\n\n---\n\n".join([kp_utils.transform_movie_data(i) for i in docs])
 
-        #TODO: maybe add collected_info to api reponse info ?
-        api_answer = self._answer_chain.invoke({"fields": OUTPUT_FIELDS, "question": question, "info": api_response})
+            #TODO: maybe add collected_info to api reponse info ?
+            api_answer = self._answer_chain.invoke({"fields": OUTPUT_FIELDS, "question": question, "info": api_response})
 
         if self._show_logs:
             print(api_response)
@@ -490,6 +564,8 @@ if __name__ == "__main__":
     gpt = LLMFactory.get_llm("deepinfra/Llama-3.3-70B-Instruct")
 
     search = MoviesSearch(gpt, show_logs=True)
-    print(search.invoke("Посоветуй фильмы в жанре комедия", ""))
+
+    print(search.invoke("Какой рейтинг у фильма Ирония судьбы?", ""))
+    #print(search.invoke("Посоветуй фильмы в жанре комедия", ""))
     # print(search.invoke("Посоветуй английские фильмы в жанре боевик, вышедшие после 2012 года", ""))
     #print(search.invoke("Посоветуй русские драматические фильмы", ""))

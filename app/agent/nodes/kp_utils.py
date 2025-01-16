@@ -1,4 +1,11 @@
 from typing import Annotated, Literal, TypedDict
+from app.core.config import settings
+
+
+headers = {
+            "accept": "application/json",
+            "X-API-KEY": settings.KP_API_KEY
+        }
 
 
 def transform_movie_data(movie_json: dict) -> str:
@@ -65,6 +72,7 @@ default_search_params = {
     "sortField": "rating.kp",
     "sortType": "-1",
     "votes.kp": "10000-99999999999",
+    #"persons.enProfession": ["actor", "director"],
     "selectFields": [
         "id",
         "type",

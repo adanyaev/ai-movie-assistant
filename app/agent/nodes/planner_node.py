@@ -104,17 +104,6 @@ PLANNER_PROMPT_TEMPLATE = """
 Учти, что каждый следующий агент будет использовать информацию, полученную предыдущим.
 
 ### Агенты
-PeopleSearchByName - агент возвращает информацию о людях, если известны имена этих личностей.
-Возвращает список объектов, где каждый объект содержит следующие поля:
-{people_search_by_name_fields}
-
-PeopleSearch - агент возвращает информацию о режиссерах, актерах, сценаристах и т.д. если имя неизвестно.
-Возвращает список объектов, где каждый объект содержит следующие поля:
-{people_search_fields}
-
-MovieSearchByName - агент возвращает информацию о фильмах, сериалах, аниме и т.д. если известно название.
-Возвращает список объектов, где каждый объект содержит следующие поля:
-{movies_search_by_name_fields}
 
 MoviesSearch - агент возвращает информацию о фильмах, сериалах, аниме и т.д.
 Возвращает список объектов, где каждый объект содержит следующие поля:
@@ -169,9 +158,8 @@ class PlannerNode(BaseNode):
         show_logs: bool = False,
     ):
         prompt = PromptTemplate(template=prompt, partial_variables={
-            "people_search_by_name_fields": PEOPLE_SEARCH_BY_NAME_FIELDS,
-            "people_search_fields": PEOPLE_SEARCH_FIELDS,
-            "movies_search_by_name_fields": MOVIES_SEARCH_FIELDS,
+            # "people_search_by_name_fields": PEOPLE_SEARCH_BY_NAME_FIELDS,
+            # "people_search_fields": PEOPLE_SEARCH_FIELDS,
             "movies_search_fields": MOVIES_SEARCH_FIELDS,
             "format_instructions": JsonOutputParser(pydantic_object=AgentTaskList).get_format_instructions()
         })

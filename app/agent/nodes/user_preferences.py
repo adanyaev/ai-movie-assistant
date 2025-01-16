@@ -1,8 +1,5 @@
 from typing import Literal
 from pathlib import Path
-import requests
-import os
-import copy
 
 from pydantic import BaseModel, Field
 from langchain_core.runnables.config import RunnableConfig
@@ -159,5 +156,4 @@ if __name__ == "__main__":
     gpt = LLMFactory.get_llm("deepinfra/Llama-3.3-70B-Instruct")
 
     summarizer = UserPreferencesManager(gpt, show_logs=True)
-    # print(summarizer.invoke("Cубстанция", ""))
-    print(summarizer.invoke("Зеленая миля", ""))
+    print(summarizer.invoke("Я люблю мюзиклы", ""))

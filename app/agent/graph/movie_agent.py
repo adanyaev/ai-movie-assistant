@@ -6,7 +6,6 @@ from app.agent.nodes import (
     PlannerNode,
     ExecutorNode,
     MoviesSearch,
-    MovieSearchByName,
     MovieReviewsSummarizer,
     PeopleSearch,
     PeopleSearchByName,
@@ -31,7 +30,6 @@ class MovieAgent:
 
         # tools
         movies_search = MoviesSearch(self._llm, show_logs=self._show_logs)
-        movie_search_by_name = MovieSearchByName(self._llm, show_logs=self._show_logs)
         movie_reviews_summarizer = MovieReviewsSummarizer(self._llm, show_logs=self._show_logs)
         people_search = PeopleSearch(self._llm, show_logs=self._show_logs)
         people_search_by_name = PeopleSearchByName(self._llm, show_logs=self._show_logs)
@@ -43,7 +41,6 @@ class MovieAgent:
             self._llm,
             [
                 movies_search,
-                movie_search_by_name,
                 movie_reviews_summarizer,
                 people_search,
                 people_search_by_name,

@@ -10,6 +10,7 @@ from aiogram.enums import ParseMode
 
 from app.core.config import settings
 import app.core.database as db
+from app.core import index_db
 from app import bot_handlers
 
 
@@ -21,7 +22,9 @@ async def aiogram_on_startup_polling(dispatcher: Dispatcher, bot: Bot) -> None:
     await bot.delete_webhook(drop_pending_updates=True)
     setup_handlers(dispatcher)
     db.setup_db()
-    await db.populate_db_with_fake_data()
+    #await db.populate_db_with_fake_data()
+    #index_db.populate_index_db()
+    #index_db.test_index_db()
 
 
 async def aiogram_on_shutdown_polling(dispatcher: Dispatcher, bot: Bot) -> None:

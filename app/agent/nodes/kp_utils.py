@@ -1,4 +1,13 @@
-from typing import Annotated, Literal, TypedDict
+import wikipedia
+wikipedia.set_lang("ru")
+
+from app.core.config import settings
+
+
+headers = {
+            "accept": "application/json",
+            "X-API-KEY": settings.KP_API_KEY
+        }
 
 
 def transform_movie_data(movie_json: dict) -> str:
@@ -14,8 +23,7 @@ def transform_movie_data(movie_json: dict) -> str:
     mpaa_rating = movie_json.get("ratingMpaa", "No MPAA rating")
     genres = ", ".join([genre["name"] for genre in movie_json.get("genres", [])])
     countries = ", ".join([country["name"] for country in movie_json.get("countries", [])])
-    
-    
+
     rating_data = movie_json.get("rating", {})
     kp_rating = rating_data.get("kp", "N/A")
     imdb_rating = rating_data.get("imdb", "N/A")
@@ -23,19 +31,16 @@ def transform_movie_data(movie_json: dict) -> str:
     russian_critics_rating = rating_data.get("russianFilmCritics", "N/A")
     await_rating = rating_data.get("await", "N/A")
 
-    
     votes_data = movie_json.get("votes", {})
     kp_votes = votes_data.get("kp", "N/A")
     imdb_votes = votes_data.get("imdb", "N/A")
     critics_votes = votes_data.get("filmCritics", "N/A")
 
-    
     if is_series:
         length_info = f"Episode Length: {series_length} minutes | Total Series Length: {total_series_length if total_series_length != 'N/A' else 'N/A'}"
     else:
         length_info = f"Duration: {movie_length} minutes"
 
-    
     output = f"""
     Title: {name}
     Year: {year}
@@ -57,6 +62,49 @@ def transform_movie_data(movie_json: dict) -> str:
 
     return output.strip()
 
+wiki_search_keywords = (
+        "актёр",
+        "актер",
+        "актриса",
+        "режиссер",
+        "режиссёр",
+        "сценарист",
+        "продюсер",
+        "оператор",
+        "композитор",
+        "художник-постановщик",
+        "гримёр",
+        "костюмер",
+        "звукорежиссёр",
+        "монтажёр",
+        "каскадёр",
+        "хореограф",
+        "дубляж",
+        "театр",
+        "кино",
+        "мульт",
+        "аниме",
+        "сериал",
+    )
+
+def get_person_info_from_wiki(name: str, return_summary: bool = False) -> str | None:
+
+    search_res = wikipedia.search(name, results=3)
+    for r in search_res:
+        page = wikipedia.page(r)
+        for kw in wiki_search_keywords:
+            if page.summary.find(kw) != -1:
+                break
+        else:
+            continue
+        break
+    else:
+        return None  # Персона не найдена или не относится к киноиндустрии
+    
+    if return_summary:
+        return page.summary
+    return page.content
+
 
 default_search_params = {
     "page": 1,
@@ -65,6 +113,7 @@ default_search_params = {
     "sortField": "rating.kp",
     "sortType": "-1",
     "votes.kp": "10000-99999999999",
+    #"persons.enProfession": ["actor", "director"],
     "selectFields": [
         "id",
         "type",

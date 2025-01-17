@@ -39,33 +39,49 @@ class ExecutorNode(BaseNode):
         executors: List[BaseApiTool],
         prompt: str = EXECUTOR_PROMPT_TEMPLATE,
         parser: BaseOutputParser = StrOutputParser(),
-        name = "ExecutorNode",
-        description = "Выполняет все тулы, согласно плану",
+        name="ExecutorNode",
+        description="Выполняет все тулы, согласно плану",
         show_logs: bool = False,
     ):
         super().__init__(llm, prompt, parser, name, description, show_logs)
         self.executors = executors
         self._name_to_executor = {executor._name: executor for executor in executors}
 
-    def _invoke(self, state: AgentState) -> str:
-        collected_info = []
-        plan: AgentTaskList = AgentTaskList.model_validate(state.history[-1].response_metadata)
+    def _format_collected_info_for_prompt(self, collected_info: List[str]) -> str:
+        return "\n".join(collected_info)
 
-        print(self._name_to_executor)
+    def _invoke(self, state: AgentState) -> str:
+        collected_info = [self._format_preferences_for_prompt(state.user_preferences)]
+        plan: AgentTaskList = AgentTaskList.model_validate(
+            state.history[-1].response_metadata
+        )
 
         for task in plan.tasks:
 
-            #TODO: add search of closest executor name
+            # TODO: add search of closest executor name
             executor = self._name_to_executor[task.agent]
 
-            collected_info.append(executor.invoke(task.question, collected_info[-1] if collected_info else ""))
+            collected_info.append(
+                executor.invoke(
+                    task.question,
+                    self._format_collected_info_for_prompt(collected_info),
+                    user_id=state.user_id,
+                )
+            )
 
-        answer = self._chain.invoke({"history": self._history_to_str(state.history), "collected_info": collected_info})
+        answer = self._chain.invoke(
+            {
+                "history": self._history_to_str(state.history),
+                "collected_info": self._format_collected_info_for_prompt(
+                    collected_info
+                ),
+            }
+        )
 
         if self._show_logs:
             print(f"---{self._name}---")
+            print(self._format_collected_info_for_prompt(collected_info))
             print(answer)
-            print(collected_info)
             print("-------------------")
 
         state.history.append(AIMessage(name=self._name, content=answer))

@@ -12,6 +12,12 @@ async_engine = create_async_engine(
     settings.ASYNC_DB_URI,
     echo=settings.VERBOSE_DB,
 )
+
+engine = create_engine(
+        settings.DB_URI,
+        echo=settings.VERBOSE_DB,
+    )
+
 async_session_factory = async_sessionmaker(async_engine)
 
 def init_db() -> None:

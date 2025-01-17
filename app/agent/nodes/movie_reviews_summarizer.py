@@ -60,7 +60,7 @@ class MovieReviewsSummarizer(BaseApiTool):
         self._show_logs = show_logs
 
 
-    def _invoke(self, question: str, collected_info: str) -> str:
+    def _invoke(self, question: str, collected_info: str, *args, **kwargs) -> str:
 
         movie_name = question.strip("\"\' *\n")
 

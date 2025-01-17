@@ -1,15 +1,14 @@
 from typing import Annotated
 import datetime
 
-from sqlalchemy.types import TIMESTAMP
+from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm import DeclarativeBase
 
 created_at = Annotated[
     datetime.datetime,
     mapped_column(
-        default=datetime.datetime.now(datetime.UTC),
-        type_=TIMESTAMP(timezone=True)
+        server_default=func.now()
     ),
 ]
 

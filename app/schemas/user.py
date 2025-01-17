@@ -1,13 +1,14 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.user import PreferenceItem, PreferenceType
 from .message import Message
 
+
 class UserPreferenceBase(BaseModel):
-    preference_item: PreferenceItem
-    preference_type: PreferenceType
-    item_name: str
+    item_name: str = Field(description="Название элемента")
+    preference_item: PreferenceItem = Field(description="Тип элемента")
+    preference_type: PreferenceType = Field(description="Тип предпочтения: нравится или не нравится")
 
 class UserPreference(UserPreferenceBase):
     id: int

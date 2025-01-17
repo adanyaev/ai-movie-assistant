@@ -11,9 +11,11 @@ services:
       - DB_URI=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - ASYNC_DB_URI=postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - DROP_DB=${DROP_DB}
+      - INDEX_DB_HOST=index_db
+      - INDEX_DB_PORT=8000
     depends_on:
       - db
-
+      - index_db
 
   db:
     image: postgres
@@ -47,5 +49,15 @@ services:
     depends_on:
       - db
 
+  index_db:
+    image: chromadb/chroma:0.6.3
+    command: ["--reload", "--workers 1", "--host 0.0.0.0", "--port 8000"]
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+    volumes:
+      - index-db-data:/chroma
+
 volumes:
   app-db-data:
+  index-db-data:

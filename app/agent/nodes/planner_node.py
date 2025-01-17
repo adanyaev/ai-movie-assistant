@@ -193,6 +193,7 @@ class PlannerNode(BaseNode):
         
         if self._show_logs:
             print(f"---{self._name}---")
+            print(history)
             print(plan)
             print("-------------------")
 

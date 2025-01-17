@@ -22,7 +22,7 @@ async def aiogram_on_startup_polling(dispatcher: Dispatcher, bot: Bot) -> None:
     await bot.delete_webhook(drop_pending_updates=True)
     setup_handlers(dispatcher)
     db.setup_db()
-    await db.populate_db_with_fake_data()
+    #await db.populate_db_with_fake_data()
     #index_db.populate_index_db()
     #index_db.test_index_db()
 

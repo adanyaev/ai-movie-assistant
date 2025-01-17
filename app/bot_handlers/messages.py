@@ -34,7 +34,7 @@ async def general_handler(message: Message) -> None:
             curr_user = await crud.user.get_by_tg_chat_id(session, message.chat.id)
         
             messages = curr_user.messages[-settings.USER_HISTORY_LIMIT:]
-            state = build_state([(msg.message_type.value, msg.content) for msg in messages], curr_user.id)
+            state = build_state([(msg.message_type.value, msg.content) for msg in messages], curr_user.id, curr_user.preferences)
             new_state = agent_instance.invoke(state)
 
             answ_type, answ_text = new_state.history[-1].type, new_state.history[-1].content

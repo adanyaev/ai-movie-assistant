@@ -58,11 +58,12 @@ COLLECTED_INFO:
 
 PEOPLE_SEARCH_BY_NAME_ANSWER_PROMPT_TEMPLATE = """
 ## System
-Ты отвечаешь на вопрос пользователя по актерам, режиссерам и т.д.
+Ты формируешь ответ на запрос пользователя об актерах, режиссерах и т.д.
 
 ## Твоя задача
 Тебе на вход приходит вопрос QUESTION и данные в формате JSON в которых нужно искать информацию INFO.
-Дай ответ на QUESTION, используя данные из INFO. В ответе частично повтори вопрос, чтобы можно было понять что конкретно ты нашел.
+Также тебе приходит информация COLLECTED_INFO, собранная ранее в процессе работы системы.
+Дай ответ на QUESTION, используя данные из INFO и COLLECTED_INFO. В ответе частично повтори вопрос, чтобы можно было понять что конкретно ты нашел.
 
 ## Описание полей в INFO
 {fields}
@@ -70,6 +71,9 @@ PEOPLE_SEARCH_BY_NAME_ANSWER_PROMPT_TEMPLATE = """
 ## Пример 1
 QUESTION:
 Какой рост у Киану Ривза?
+
+COLLECTED_INFO:
+
 INFO:
 [
     {{
@@ -83,13 +87,23 @@ INFO:
         "growth": 174
     }}
 ]
+
 Твой ответ:
 Рост Киану Ривза 186 сантиметров
 
+---
+
 QUESTION:
 {question}
+
+COLLECTED_INFO:
+```text
+{collected_info}
+```
+
 INFO:
 {info}
+
 Твой ответ:
 """
 
@@ -115,7 +129,9 @@ class PeopleSearchByName(BaseApiTool):
 
     def _invoke(self, question: str, collected_info: str, *args, **kwargs) -> str:
 
-        params = self._chain.invoke({"question": question, "collected_info": collected_info})
+        params = self._chain.invoke(
+            {"question": question, "collected_info": collected_info}
+        )
 
         if self._load_info_from_wiki:
             api_response = kp_utils.get_person_info_from_wiki(params["query"])
@@ -125,10 +141,19 @@ class PeopleSearchByName(BaseApiTool):
         else:
             params["page"] = 1
             params["limit"] = self._limit
-            api_response = requests.get(PeopleSearchByName.BASE_URL, params=params, headers=kp_utils.headers).json()["docs"]
+            api_response = requests.get(
+                PeopleSearchByName.BASE_URL, params=params, headers=kp_utils.headers
+            ).json()["docs"]
             fields = OUTPUT_FIELDS
-            
-        api_answer = self._answer_chain.invoke({"fields": fields, "question": question, "info": api_response})
+
+        api_answer = self._answer_chain.invoke(
+            {
+                "fields": fields,
+                "question": question,
+                "collected_info": collected_info,
+                "info": api_response,
+            }
+        )
 
         if self._show_logs:
             print(f"---{self._name}---")

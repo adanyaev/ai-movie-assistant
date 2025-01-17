@@ -2,26 +2,21 @@ from typing import Literal
 from pathlib import Path
 
 from pydantic import BaseModel, Field
-from langchain_core.runnables.config import RunnableConfig
 from langchain_core.output_parsers import StrOutputParser, BaseOutputParser, PydanticOutputParser
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import PromptTemplate
 from dotenv import load_dotenv
 
-from app.models.user import PreferenceItem, PreferenceType, UserPreference as UserPreferenceModel
+from app.schemas.user import UserPreferenceBase
+from app.models.user import UserPreference as UserPreferenceModel
 from app.core.database import engine
 from app.agent.nodes._base_api_tool import BaseApiTool
 
 
 load_dotenv(Path(__file__).parent.parent.parent.parent.resolve() / ".env")
 
-class UserPreference(BaseModel):
-    item_name: str = Field(description="Название элемента")
-    preference_item: PreferenceItem = Field(description="Тип элемента")
-    preference_type: PreferenceType = Field(description="Тип предпочтения: нравится или не нравится")
-
 class UserPreferences(BaseModel):
-    preferences: list[UserPreference] = Field(description="Список предпочтений пользователя")
+    preferences: list[UserPreferenceBase] = Field(description="Список предпочтений пользователя")
 
 
 USER_PREFERENCES_MANAGER_PROMPT_TEMPLATE = """

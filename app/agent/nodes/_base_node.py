@@ -6,6 +6,8 @@ from langchain_core.output_parsers import StrOutputParser, BaseOutputParser
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import PromptTemplate
 
+from app.models.user import PreferenceItem, PreferenceType
+from app.schemas.user import UserPreferenceBase
 from ..graph import AgentState
 
 
@@ -32,6 +34,36 @@ class BaseNode(ABC):
         }
         return "\n".join([f"{roles_to_str[type(x)]}: {x.content}" for x in history
                          if not isinstance(x, FunctionMessage)])
+
+    def _format_preferences_for_prompt(
+        self, preferences: List[UserPreferenceBase]
+    ) -> str:
+        """
+        Преобразует данные о предпочтениях пользователя в строку для системного промпта LLM-агента.
+
+        :param preferences: Объект UserPreferences с предпочтениями пользователя
+        :return: Строка для использования в системном промпте
+        """
+        type2russian = {
+            PreferenceItem.MOVIE: "фильм",
+            PreferenceItem.GENRE: "жанр",
+            PreferenceItem.DIRECTOR: "режиссёр",
+            PreferenceItem.ACTOR: "актёр",
+        }
+        formatted_items = []
+
+        for pref in preferences:
+            action = (
+                "нравится"
+                if pref.preference_type == PreferenceType.LIKE
+                else "не нравится"
+            )
+            item_type = type2russian[pref.preference_item]
+            formatted_items.append(
+                f'Пользователю {action} {item_type} "{pref.item_name}".'
+            )
+
+        return "\n".join(formatted_items)
 
     def invoke(self, state: AgentState) -> str:
         return self._invoke(state)

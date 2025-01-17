@@ -20,7 +20,7 @@ MOVIE_SEARCH_PROMPT_TEMPLATE = """
 Ты помощник в составлении запроса для API с данными о фильмах и сериалах.
 
 ## Твоя задача
-Тебе на вход приходит вопрос QUESTION и ранее собранная информация COLLECTED_INFO.
+Тебе на вход приходит запрос QUESTION и ранее собранная информация COLLECTED_INFO.
 Тебе нужно составить словарь параметров для отправки http запроса, чтобы получить ответ на QUESTION.
 
 Твой запрос будет отправлен к API со следующими полями для поиска:
@@ -547,7 +547,7 @@ class MoviesSearch(BaseApiTool):
         else:
             api_response = "\n\n---\n\n".join([kp_utils.transform_movie_data(i) for i in docs])
 
-            #TODO: maybe add collected_info to api reponse info ?
+            #TODO: maybe add collected_info to api response info ?
             api_answer = self._answer_chain.invoke({"fields": OUTPUT_FIELDS, "question": question, "info": api_response})
 
         if self._show_logs:

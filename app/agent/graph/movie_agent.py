@@ -8,7 +8,7 @@ from app.agent.nodes import (
     MoviesSearch,
     MovieReviewsSummarizer,
     MovieSemanticSearch,
-    PeopleSearch,
+    #PeopleSearch,
     PeopleSearchByName,
     UserPreferencesManager,
 
@@ -33,7 +33,7 @@ class MovieAgent:
         movies_search = MoviesSearch(self._llm, show_logs=self._show_logs)
         movie_reviews_summarizer = MovieReviewsSummarizer(self._llm, show_logs=self._show_logs)
         movie_semantic_search = MovieSemanticSearch(show_logs=self._show_logs)
-        people_search = PeopleSearch(self._llm, show_logs=self._show_logs)
+        #people_search = PeopleSearch(self._llm, show_logs=self._show_logs)
         people_search_by_name = PeopleSearchByName(self._llm, show_logs=self._show_logs)
         prefs_manager = UserPreferencesManager(self._llm, show_logs=self._show_logs)
 
@@ -45,7 +45,7 @@ class MovieAgent:
                 movies_search,
                 movie_reviews_summarizer,
                 movie_semantic_search,
-                people_search,
+                #people_search,
                 people_search_by_name,
                 prefs_manager,
             ],

@@ -33,9 +33,9 @@ class CRUDUser(CRUDBase):
         return [UserPreferenceSchema.model_validate(i) for i in result.scalars().all()]
 
     async def create_preference(
-        self, db: AsyncSession, user_id: int, item_name: str, item: PreferenceItem, ptype: PreferenceType
+        self, db: AsyncSession, user_id: int, kp_id: int, item_name: str, item: PreferenceItem, ptype: PreferenceType
     ) -> UserPreferenceSchema:
-        preference = UserPreference(user_id=user_id, item_name=item_name, preference_item=item, preference_type=ptype)
+        preference = UserPreference(user_id=user_id, kp_id=kp_id, item_name=item_name, preference_item=item, preference_type=ptype)
         db.add(preference)
         await db.commit()
         await db.refresh(preference)

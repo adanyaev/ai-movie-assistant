@@ -1,10 +1,18 @@
+import requests
 import wikipedia
 wikipedia.set_lang("ru")
 
 from app.core.config import settings
 
 
-headers = {
+BASE_URL = "https://api.kinopoisk.dev/v1.4"
+MOVIE_SEARCH_URL = BASE_URL + "/movie"
+MOVIE_SEARCH_BY_NAME_URL = BASE_URL + "/movie/search"
+PERSON_SEARCH_BY_NAME_URL = BASE_URL + "/person/search"
+REVIEW_SEARCH_URL = BASE_URL + "/review"
+
+
+HEADERS = {
             "accept": "application/json",
             "X-API-KEY": settings.KP_API_KEY
         }
@@ -62,7 +70,7 @@ def transform_movie_data(movie_json: dict) -> str:
 
     return output.strip()
 
-wiki_search_keywords = (
+WIKI_SEARCH_KEYWORDS = (
         "актёр",
         "актер",
         "актриса",
@@ -92,7 +100,7 @@ def get_person_info_from_wiki(name: str, return_summary: bool = False) -> str | 
     search_res = wikipedia.search(name, results=3)
     for r in search_res:
         page = wikipedia.page(r)
-        for kw in wiki_search_keywords:
+        for kw in WIKI_SEARCH_KEYWORDS:
             if page.summary.find(kw) != -1:
                 break
         else:
@@ -106,7 +114,7 @@ def get_person_info_from_wiki(name: str, return_summary: bool = False) -> str | 
     return page.content
 
 
-default_search_params = {
+DEFAULT_SEARCH_PARAMS = {
     "page": 1,
     "limit": 5,
     "type": ["movie", "tv-series"],
@@ -147,7 +155,7 @@ default_search_params = {
 }
 
 
-genre_names = (
+GENRE_NAMES = (
     "аниме",
     "биография",
     "боевик",
@@ -170,7 +178,7 @@ genre_names = (
     "мюзикл",
     "новости",
     "приключения",
-    "реальное ТВ",
+    "реальное тв",
     "семейный",
     "спорт",
     "ток-шоу",
@@ -182,4 +190,56 @@ genre_names = (
     "церемония",
 )
 
-all_item_types = ("animated-series", "anime", "cartoon", "movie", "tv-series")
+ITEM_TYPES = ("animated-series", "anime", "cartoon", "movie", "tv-series")
+
+
+class InferKpId:
+
+    @staticmethod
+    def movie(item_name: str) -> int | None:
+        item_name = item_name.strip("\"\' *\n")
+        params = {
+            "page": 1,
+            "limit": 1,
+            "query": item_name,
+        }
+        api_response = requests.get(
+            MOVIE_SEARCH_BY_NAME_URL,
+            params=params,
+            headers=HEADERS,
+        )
+        if not api_response.ok:
+            return None
+        data_json = api_response.json()
+        if not data_json["docs"]:
+            return None
+        
+        return data_json["docs"][0]["id"]
+    
+    @staticmethod
+    def person(item_name: str) -> int | None:
+        item_name = item_name.strip("\"\' *\n")
+        params = {
+            "page": 1,
+            "limit": 1,
+            "query": item_name,
+        }
+        api_response = requests.get(
+            PERSON_SEARCH_BY_NAME_URL,
+            params=params,
+            headers=HEADERS,
+        )
+        if not api_response.ok:
+            return None
+        data_json = api_response.json()
+        if not data_json["docs"]:
+            return None
+        return data_json["docs"][0]["id"]
+    
+    @staticmethod
+    def genre(item_name: str) -> str | None:
+        try:
+            idx = GENRE_NAMES.index(item_name.strip("\"\' *\n").lower())
+        except ValueError:
+            return None
+        return idx

@@ -467,9 +467,6 @@ INFO:
 
 
 class MoviesSearch(BaseApiTool):
-    BASE_URL_MOVIE_SEARCH_BY_NAME = "https://api.kinopoisk.dev/v1.4/movie/search"
-    BASE_URL_PERSON_SEARCH_BY_NAME = "https://api.kinopoisk.dev/v1.4/person/search"
-    BASE_URL = "https://api.kinopoisk.dev/v1.4/movie"
 
     def __init__(
         self,
@@ -496,33 +493,21 @@ class MoviesSearch(BaseApiTool):
         )
 
     def _find_persons_ids(self, persons: list[str]) -> list[str]:
-        params = {
-            "page": 1,
-            "limit": 1,
-        }
         persons_ids = []
         for person in persons:
             param_prefix = ""
             if person[0] == "!" or person[0] == "+":
                 param_prefix = person[0]
                 person = person[1:]
-            params["query"] = person
-            api_response = requests.get(
-                self.BASE_URL_PERSON_SEARCH_BY_NAME,
-                params=params,
-                headers=kp_utils.headers,
-            )
-            if not api_response.ok:
+            person_id = kp_utils.InferKpId.person(person)
+            if not person_id:
                 continue
-            data_json = api_response.json()
-            if not data_json["docs"]:
-                continue
-            persons_ids.append(param_prefix + str(data_json["docs"][0]["id"]))
+            persons_ids.append(param_prefix + str(person_id))
 
         return persons_ids
 
     def _get_docs_filter_search(self, params_generated: dict) -> list:
-        params = copy.deepcopy(kp_utils.default_search_params)
+        params = copy.deepcopy(kp_utils.DEFAULT_SEARCH_PARAMS)
         params["limit"] = self._limit
         if "persons.name" in params_generated:
             persons_ids = self._find_persons_ids(params_generated["persons.name"])
@@ -531,7 +516,7 @@ class MoviesSearch(BaseApiTool):
             del params_generated["persons.name"]
         params.update(params_generated)
         api_response = requests.get(
-            self.BASE_URL, params=params, headers=kp_utils.headers
+            kp_utils.MOVIE_SEARCH_URL, params=params, headers=kp_utils.HEADERS
         )
         if not api_response.ok:
             return []
@@ -547,9 +532,9 @@ class MoviesSearch(BaseApiTool):
         for title in generated_params["title"]:
             params["query"] = title
             api_response = requests.get(
-                self.BASE_URL_MOVIE_SEARCH_BY_NAME,
+                kp_utils.MOVIE_SEARCH_BY_NAME_URL,
                 params=params,
-                headers=kp_utils.headers,
+                headers=kp_utils.HEADERS,
             )
             if not api_response.ok:
                 continue

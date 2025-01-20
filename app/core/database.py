@@ -54,7 +54,8 @@ async def populate_db_with_fake_data() -> None:
         for i in range(5):
             user_data = {
                 "full_name": f"User {i+1}",
-                "tg_chat_id": random.randint(1000, 999999)
+                "tg_chat_id": random.randint(1000, 999999),
+                "is_active": False
             }
             user = await crud.user.create(session, user_data)
             users.append(user)
@@ -65,6 +66,7 @@ async def populate_db_with_fake_data() -> None:
                 await crud.user.create_preference(
                     session, 
                     user.id,
+                    -1,
                     f"test pref {item.value} type",
                     item,
                     ptype

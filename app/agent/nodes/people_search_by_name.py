@@ -109,7 +109,6 @@ INFO:
 
 
 class PeopleSearchByName(BaseApiTool):
-    BASE_URL = "https://api.kinopoisk.dev/v1.4/person/search"
 
     def __init__(
         self,
@@ -142,7 +141,7 @@ class PeopleSearchByName(BaseApiTool):
             params["page"] = 1
             params["limit"] = self._limit
             api_response = requests.get(
-                PeopleSearchByName.BASE_URL, params=params, headers=kp_utils.headers
+                kp_utils.PERSON_SEARCH_BY_NAME_URL, params=params, headers=kp_utils.HEADERS
             ).json()["docs"]
             fields = OUTPUT_FIELDS
 

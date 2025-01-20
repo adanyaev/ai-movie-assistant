@@ -8,9 +8,10 @@ from langchain_core.prompts import PromptTemplate
 from dotenv import load_dotenv
 
 from app.schemas.user import UserPreferenceBase
-from app.models.user import UserPreference as UserPreferenceModel
+from app.models.user import UserPreference as UserPreferenceModel, PreferenceItem, PreferenceType
 from app.core.database import engine
 from app.agent.nodes._base_api_tool import BaseApiTool
+from . import kp_utils
 
 
 load_dotenv(Path(__file__).parent.parent.parent.parent.resolve() / ".env")
@@ -124,14 +125,34 @@ class UserPreferencesManager(BaseApiTool):
         query = query.strip("\"\' *\n")
         prefs = self._chain.invoke({"query": query}).preferences
 
+        infered_prefs = []
+        infered_kp_ids = []
+        for pref in prefs:
+            
+            kp_id = None
+            if pref.preference_item == PreferenceItem.MOVIE:
+                kp_id = kp_utils.InferKpId.movie(pref.item_name)
+            elif pref.preference_item == PreferenceItem.GENRE:
+                kp_id = kp_utils.InferKpId.genre(pref.item_name)
+            elif pref.preference_item == PreferenceItem.ACTOR or pref.preference_item == PreferenceItem.DIRECTOR:
+                kp_id = kp_utils.InferKpId.person(pref.item_name)
+
+            if kp_id:
+                infered_kp_ids.append(kp_id)
+                infered_prefs.append(pref)
+
+        if not infered_prefs:
+            return ""
+
         with engine.connect() as conn:
             stmt = UserPreferenceModel.__table__.insert().values([
                 {
                     "item_name": pref.item_name,
                     "preference_item": pref.preference_item,
                     "preference_type": pref.preference_type,
+                    "kp_id": infered_kp_ids[i],
                     "user_id": user_id
-                } for pref in prefs
+                } for i, pref in enumerate(infered_prefs)
             ])
             conn.execute(stmt)
             conn.commit()

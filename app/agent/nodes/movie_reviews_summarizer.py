@@ -40,8 +40,6 @@ MOVIE_REVIEWS_SUMMARIZE_PROMPT_TEMPLATE = """
 
 
 class MovieReviewsSummarizer(BaseApiTool):
-    MOVIE_BASE_URL = "https://api.kinopoisk.dev/v1.4/movie/search"
-    REVIEW_BASE_URL = "https://api.kinopoisk.dev/v1.4/review"
 
     def __init__(
         self,
@@ -64,18 +62,9 @@ class MovieReviewsSummarizer(BaseApiTool):
 
         movie_name = question.strip("\"\' *\n")
 
-        headers = {
-            "accept": "application/json",
-            "X-API-KEY": os.environ["KP_API_KEY"]
-        }
-        params = copy.deepcopy(kp_utils.default_search_params)
-        params["limit"] = 1
-        params["type"] = kp_utils.all_item_types
-        params["query"] = movie_name
-        api_response = requests.get(self.MOVIE_BASE_URL, params=params, headers=headers)
-        if not api_response.ok:
-            return "Произошла ошибка при обращении к API"
-        movie_id = api_response.json()["docs"][0]['id']
+        movie_id = kp_utils.InferKpId.movie(movie_name)
+        if not movie_id:
+            return "Не удалось найти фильм по запросу"
 
         review_search_params = {
             "page": 1,
@@ -85,7 +74,7 @@ class MovieReviewsSummarizer(BaseApiTool):
             "sortType": "-1",
             #"selectFields": ["reviewLikes", "review"]
         }
-        review_api_response = requests.get(self.REVIEW_BASE_URL, params=review_search_params, headers=headers)
+        review_api_response = requests.get(kp_utils.REVIEW_SEARCH_URL, params=review_search_params, headers=kp_utils.HEADERS)
         if not review_api_response.ok:
             return "Произошла ошибка при обращении к API"
         movie_reviews = sorted(review_api_response.json()["docs"], key=lambda x: x['userRating'], reverse=True)

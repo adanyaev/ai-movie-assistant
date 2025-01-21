@@ -127,30 +127,44 @@ class RecommendUsersAutonomousTask:
                 break
             pref = positive_prefs[i % len(positive_prefs)]
             if pref.preference_item == PreferenceItem.MOVIE:
-                param_key = "similarMovies.id"
-                param_value = [pref.kp_id]
-            elif pref.preference_item == PreferenceItem.GENRE:
-                param_key = "genres.name"
-                param_value = [pref.item_name]
-            elif (
-                pref.preference_item == PreferenceItem.ACTOR
-                or pref.preference_item == PreferenceItem.DIRECTOR
-            ):
-                param_key = "persons.id"
-                param_value = [pref.kp_id]
-            else:
-                raise ValueError("Unknown preference item")
+                api_response = requests.get(
+                    kp_utils.MOVIE_SEARCH_URL + f"/{pref.kp_id}", headers=kp_utils.HEADERS
+                )
+                if not api_response.ok:
+                    positive_prefs.pop(i % len(positive_prefs))
+                    continue
+                api_response = api_response.json()
+                if "similarMovies" not in api_response:
+                    positive_prefs.pop(i % len(positive_prefs))
+                    continue
+                pref_docs = []
+                for movie in api_response["similarMovies"]:
+                    if movie["id"] not in watched_movies:
+                        pref_docs.append(requests.get(kp_utils.MOVIE_SEARCH_URL + f"/{movie['id']}", headers=kp_utils.HEADERS).json())
 
-            params = copy.deepcopy(kp_utils.DEFAULT_SEARCH_PARAMS)
-            params[param_key] = param_value
-            params["limit"] = search_limit
-            api_response = requests.get(
-                kp_utils.MOVIE_SEARCH_URL, params=params, headers=kp_utils.HEADERS
-            )
-            if not api_response.ok:
-                positive_prefs.pop(i % len(positive_prefs))
-                continue
-            pref_docs = api_response.json()["docs"]
+            else:
+                if pref.preference_item == PreferenceItem.GENRE:
+                    param_key = "genres.name"
+                    param_value = [pref.item_name]
+                elif (
+                    pref.preference_item == PreferenceItem.ACTOR
+                    or pref.preference_item == PreferenceItem.DIRECTOR
+                ):
+                    param_key = "persons.id"
+                    param_value = [pref.kp_id]
+                else:
+                    raise ValueError("Unknown preference item")
+
+                params = copy.deepcopy(kp_utils.DEFAULT_SEARCH_PARAMS)
+                params[param_key] = param_value
+                params["limit"] = search_limit
+                api_response = requests.get(
+                    kp_utils.MOVIE_SEARCH_URL, params=params, headers=kp_utils.HEADERS
+                )
+                if not api_response.ok:
+                    positive_prefs.pop(i % len(positive_prefs))
+                    continue
+                pref_docs = api_response.json()["docs"]
             random.shuffle(pref_docs)
             pref_doc_idx = 0
             while pref_doc_idx < len(pref_docs) and pref_docs[pref_doc_idx]["id"] in watched_movies:
@@ -227,7 +241,7 @@ class RecommendUsersAutonomousTask:
                 print(f"Made up {len(rec_docs)} recommendations for user {user.tg_chat_id}.")
 
             answer = self._prepare_answer(rec_docs, source_prefs)
-            
+
             if self._show_logs:
                 print(f"Answer for user {user.tg_chat_id}:\n{answer}")
                 print("-------------------")

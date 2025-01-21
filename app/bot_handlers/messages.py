@@ -1,3 +1,4 @@
+import traceback
 from aiogram import Router
 from aiogram.types import Message
 
@@ -54,4 +55,5 @@ async def general_handler(message: Message) -> None:
 
     except Exception as e:
         print(e)
+        traceback.print_exc()
         await message.answer("Internal error")

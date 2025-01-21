@@ -12,6 +12,7 @@ from app.core.config import settings
 import app.core.database as db
 from app.core import index_db
 from app import bot_handlers
+from app.bot_handlers.commands import setup_bot_commands
 
 
 def setup_handlers(dp: Dispatcher) -> None:
@@ -21,6 +22,7 @@ def setup_handlers(dp: Dispatcher) -> None:
 async def aiogram_on_startup_polling(dispatcher: Dispatcher, bot: Bot) -> None:
     await bot.delete_webhook(drop_pending_updates=True)
     setup_handlers(dispatcher)
+    await setup_bot_commands(bot)
     db.setup_db()
     #await db.populate_db_with_fake_data()
     #index_db.populate_index_db()

@@ -13,6 +13,7 @@ class UserPreferenceBase(BaseModel):
 class UserPreference(UserPreferenceBase):
     id: int
     user_id: int
+    kp_id: int
     #user: "User"
 
     model_config = ConfigDict(from_attributes=True)

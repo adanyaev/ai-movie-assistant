@@ -33,9 +33,9 @@ class User(Base):
     )
     preferences: Mapped[list["UserPreference"]] = relationship(back_populates="user", lazy="selectin")
 
-    __table_args__ = (
-        Index('ix_users_tg_chat_id', 'tg_chat_id'),
-    )
+    # __table_args__ = (
+    #     Index('ix_users_tg_chat_id', 'tg_chat_id'),
+    # )
 
 
 class UserPreference(Base):
@@ -43,6 +43,7 @@ class UserPreference(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    kp_id: Mapped[int] = mapped_column(nullable=False)
     user: Mapped["User"] = relationship(back_populates="preferences", lazy="joined")
 
     item_name: Mapped[str] = mapped_column(nullable=False)

@@ -27,13 +27,12 @@ def populate_index_db() -> None:
     import requests
     from app.agent.nodes import kp_utils
 
-    MOVIE_BASE_URL = "https://api.kinopoisk.dev/v1.4/movie"
 
-    params = copy.deepcopy(kp_utils.default_search_params)
+    params = copy.deepcopy(kp_utils.DEFAULT_SEARCH_PARAMS)
     params["limit"] = 50
     params["lists"] = ["top250"]
 
-    api_response = requests.get(MOVIE_BASE_URL, params=params, headers=kp_utils.headers)
+    api_response = requests.get(kp_utils.MOVIE_SEARCH_URL, params=params, headers=kp_utils.HEADERS)
     if not api_response.ok:
         print("Произошла ошибка при обращении к API")
 

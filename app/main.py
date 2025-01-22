@@ -25,7 +25,8 @@ async def aiogram_on_startup_polling(dispatcher: Dispatcher, bot: Bot) -> None:
     await setup_bot_commands(bot)
     db.setup_db()
     #await db.populate_db_with_fake_data()
-    #index_db.populate_index_db()
+    #index_db.drop_index_db()
+    index_db.populate_index_db()
     #index_db.test_index_db()
 
 
